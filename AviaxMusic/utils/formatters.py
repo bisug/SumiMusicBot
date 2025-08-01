@@ -10,15 +10,12 @@ def get_readable_time(seconds: int) -> str:
     while count < 4:
         count += 1
         if count < 3:
-            remainder, result = divmod(seconds, 60)
+            seconds, result = divmod(seconds, 60)
         else:
-            remainder, result = divmod(seconds, 24)
-        if seconds == 0 and remainder == 0:
+            seconds, result = divmod(seconds, 24)
+        if seconds == 0 and result == 0:
             break
-        time_list.append(int(result))
-        seconds = int(remainder)
-    for i in range(len(time_list)):
-        time_list[i] = str(time_list[i]) + time_suffix_list[i]
+        time_list.append(f"{int(result)}{time_suffix_list[count - 1]}")
     if len(time_list) == 4:
         ping_time += time_list.pop() + ", "
     time_list.reverse()
@@ -27,72 +24,88 @@ def get_readable_time(seconds: int) -> str:
 
 
 def convert_bytes(size: float) -> str:
-    """humanize size"""
     if not size:
         return ""
     power = 1024
-    t_n = 0
-    power_dict = {0: " ", 1: "Ki", 2: "Mi", 3: "Gi", 4: "Ti"}
-    while size > power:
+    n = 0
+    power_dict = {0: "", 1: "Ki", 2: "Mi", 3: "Gi", 4: "Ti"}
+    while size > power and n < 4:
         size /= power
-        t_n += 1
-    return "{:.2f} {}B".format(size, power_dict[t_n])
+        n += 1
+    return "{:.2f} {}B".format(size, power_dict[n])
 
 
 async def int_to_alpha(user_id: int) -> str:
-    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-    text = ""
-    user_id = str(user_id)
-    for i in user_id:
-        text += alphabet[int(i)]
-    return text
+    alphabet = "abcdefghij"
+    return "".join(alphabet[int(digit)] for digit in str(user_id))
 
 
 async def alpha_to_int(user_id_alphabet: str) -> int:
-    alphabet = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
-    user_id = ""
-    for i in user_id_alphabet:
-        index = alphabet.index(i)
-        user_id += str(index)
-    user_id = int(user_id)
-    return user_id
+    alphabet = "abcdefghij"
+    return int("".join(str(alphabet.index(char)) for char in user_id_alphabet))
 
 
-def time_to_seconds(time):
-    stringt = str(time)
-    return sum(int(x) * 60**i for i, x in enumerate(reversed(stringt.split(":"))))
+def time_to_seconds(time: str) -> int:
+    return sum(int(x) * 60 ** i for i, x in enumerate(reversed(time.split(":"))))
 
 
-def seconds_to_min(seconds):
-    if seconds is not None:
-        seconds = int(seconds)
-        d, h, m, s = (
-            seconds // (3600 * 24),
-            seconds // 3600 % 24,
-            seconds % 3600 // 60,
-            seconds % 3600 % 60,
-        )
-        if d > 0:
-            return "{:02d}:{:02d}:{:02d}:{:02d}".format(d, h, m, s)
-        elif h > 0:
-            return "{:02d}:{:02d}:{:02d}".format(h, m, s)
-        elif m > 0:
-            return "{:02d}:{:02d}".format(m, s)
-        elif s > 0:
-            return "00:{:02d}".format(s)
-    return "-"
+def seconds_to_min(seconds: int) -> str:
+    if seconds is None:
+        return "-"
+    d, h, m, s = (
+        seconds // 86400,
+        seconds % 86400 // 3600,
+        seconds % 3600 // 60,
+        seconds % 60,
+    )
+    if d:
+        return f"{d:02}:{h:02}:{m:02}:{s:02}"
+    if h:
+        return f"{h:02}:{m:02}:{s:02}"
+    if m:
+        return f"{m:02}:{s:02}"
+    return f"00:{s:02}"
 
 
-def speed_converter(seconds, speed):
-    if str(speed) == str("0.5"):
-        seconds = seconds * 2
-    if str(speed) == str("0.75"):
-        seconds = seconds + ((50 * seconds) // 100)
-    if str(speed) == str("1.5"):
-        seconds = seconds - ((25 * seconds) // 100)
-    if str(speed) == str("2.0"):
-        seconds = seconds - ((50 * seconds) // 100)
-    collect = seconds
+def speed_converter(seconds: int, speed: float):
+    original = seconds
+    speed = float(speed)
+    if speed == 0.5:
+        seconds *= 2
+    elif speed == 0.75:
+        seconds += seconds * 0.5
+    elif speed == 1.5:
+        seconds -= seconds * 0.25
+    elif speed == 2.0:
+        seconds -= seconds * 0.5
+    return seconds_to_min(int(seconds)), original
+
+
+def check_duration(file_path: str):
+    command = [
+        "ffprobe",
+        "-loglevel", "quiet",
+        "-print_format", "json",
+        "-show_format",
+        "-show_streams",
+        file_path,
+    ]
+    pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    out, _ = pipe.communicate()
+    try:
+        data = json.loads(out)
+        return float(data.get("format", {}).get("duration")) or \
+               next((float(s["duration"]) for s in data.get("streams", []) if "duration" in s), "Unknown")
+    except Exception:
+        return "Unknown"
+
+
+formats = list(set([
+    "webm", "mkv", "flv", "vob", "ogv", "ogg", "rrc", "gifv", "mng", "mov",
+    "avi", "qt", "wmv", "yuv", "rm", "asf", "amv", "mp4", "m4p", "m4v", "mpg",
+    "mp2", "mpeg", "mpe", "mpv", "svi", "3gp", "3g2", "mxf", "roq", "nsv",
+    "f4v", "f4p", "f4a", "f4b"
+]))    collect = seconds
     if seconds is not None:
         seconds = int(seconds)
         d, h, m, s = (
@@ -183,3 +196,4 @@ formats = [
     "f4a",
     "f4b",
 ]
+
