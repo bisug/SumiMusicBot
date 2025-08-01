@@ -16,6 +16,7 @@ psutil
 py-tgcalls==0.9.7
 pytgcrypto
 pykeyboard
+pyrogram 
 kurigram
 python-dotenv
 pyyaml
@@ -27,5 +28,6 @@ uvloop
 yt-dlp
 youtube-search
 youtube-search-python
+
 
 
