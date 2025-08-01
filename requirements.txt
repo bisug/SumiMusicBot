@@ -3,14 +3,15 @@ aiohttp
 beautifulsoup4
 dnspython
 ffmpeg-python
+flask
 gitpython
 hachoir
 heroku3
-httpx[http2]==0.25.2
+httpx[http2]
 motor
 numpy
 opencv-python
-pillow==9.5.0
+pillow
 psutil
 py-tgcalls==0.9.7
 pytgcrypto
@@ -25,3 +26,4 @@ uvloop; sys_platform != "win32"
 yt-dlp
 youtube-search
 youtube-search-python
+
