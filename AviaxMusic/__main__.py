@@ -10,8 +10,10 @@ from AviaxMusic.core.call import Aviax
 from AviaxMusic.misc import sudo
 from AviaxMusic.plugins import ALL_MODULES
 from AviaxMusic.utils.database import get_banned_users, get_gbanned
-from config import BANNED_USERS
-
+from config import BANNED_USERS, WEB_APP  
+import subprocess
+if WEB_APP:
+        subprocess.Popen(['python3', 'web.py'])
 
 async def init():
     if (
@@ -60,3 +62,4 @@ async def init():
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(init())
+
