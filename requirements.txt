@@ -15,6 +15,7 @@ pillow
 psutil
 py-tgcalls==0.9.7
 pytgcrypto
+pykeyboard
 kurigram
 python-dotenv
 pyyaml
@@ -22,8 +23,9 @@ requests
 speedtest-cli
 spotipy
 unidecode
-uvloop; sys_platform != "win32"
+uvloop
 yt-dlp
 youtube-search
 youtube-search-python
+
 
