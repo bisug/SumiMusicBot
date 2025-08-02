@@ -595,7 +595,7 @@ class YouTubeAPI:
         else:
             direct = True
             downloaded_file = await download_song(link)
-        return downloaded_file, direct    return None
+        return downloaded_file, direct   
 
 async def download_video(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
@@ -1416,5 +1416,6 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
+
 
 
