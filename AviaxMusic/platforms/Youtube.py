@@ -588,14 +588,19 @@ class YouTubeAPI:
                      return None, None
                    total_size_mb = file_size / (1024 * 1024)
                    if total_size_mb > 250:
-                     print(f"File size {total_size_mb:.2f} MB exceeds the 100MB limit.")
-                     return None, None
-                   direct = True
-                   downloaded_file = await loop.run_in_executor(None, video_dl)
-        else:
-            direct = True
-            downloaded_file = await download_song(link)
-        return downloaded_file, direct   
+    print(f"File size {total_size_mb:.2f} MB exceeds the 250MB limit.")
+    return None, None
+
+direct = True
+downloaded_file = await loop.run_in_executor(None, video_dl)
+else:
+    direct = True
+    downloaded_file = await download_song(link)
+
+if downloaded_file and direct:
+    return downloaded_file, direct
+else:
+    return True
 
 async def download_video(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
@@ -1416,6 +1421,7 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
+
 
 
 
