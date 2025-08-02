@@ -578,7 +578,10 @@ class YouTubeAPI:
                     stderr=asyncio.subprocess.PIPE,
                 )
                 stdout, stderr = await proc.communicate()
-                if stdout:
+                
+
+    download_folder = "downloads"
+if stdout:
     downloaded_file = stdout.decode().split("\n")[0]
     direct = False
 else:
@@ -600,15 +603,14 @@ if not downloaded_file:
     direct = True
     downloaded_file = await download_song(link)
 
-if downloaded_file and direct is not None:
+if downloaded_file:
     return downloaded_file, direct
 else:
     return True
 
 async def download_video(link: str):
     video_id = link.split('v=')[-1].split('&')[0]
-
-    download_folder = "downloads"
+    
     for ext in ["mp4", "webm", "mkv"]:
         file_path = f"{download_folder}/{video_id}.{ext}"
         if os.path.exists(file_path):
@@ -1424,6 +1426,7 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
+
 
 
 
