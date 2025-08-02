@@ -579,25 +579,28 @@ class YouTubeAPI:
                 )
                 stdout, stderr = await proc.communicate()
                 if stdout:
-                    downloaded_file = stdout.decode().split("\n")[0]
-                    direct = False
-                else:
-                   file_size = await check_file_size(link)
-                   if not file_size:
-                     print("None file Size")
-                     return None, None
-                   total_size_mb = file_size / (1024 * 1024)
-                   if total_size_mb > 250:
-    print(f"File size {total_size_mb:.2f} MB exceeds the 250MB limit.")
-    return None, None
-
-direct = True
-downloaded_file = await loop.run_in_executor(None, video_dl)
+    downloaded_file = stdout.decode().split("\n")[0]
+    direct = False
 else:
+    file_size = await check_file_size(link)
+    if not file_size:
+        print("None file Size")
+        return None, None
+
+    total_size_mb = file_size / (1024 * 1024)
+    if total_size_mb > 250:
+        print(f"File size {total_size_mb:.2f} MB exceeds the 250MB limit.")
+        return None, None
+
+    direct = True
+    downloaded_file = await loop.run_in_executor(None, video_dl)
+
+# fallback if the above else never runs
+if not downloaded_file:
     direct = True
     downloaded_file = await download_song(link)
 
-if downloaded_file and direct:
+if downloaded_file and direct is not None:
     return downloaded_file, direct
 else:
     return True
@@ -1421,6 +1424,7 @@ class YouTubeAPI:
             direct = True
             downloaded_file = await loop.run_in_executor(None, audio_dl)
         return downloaded_file, direct
+
 
 
 
